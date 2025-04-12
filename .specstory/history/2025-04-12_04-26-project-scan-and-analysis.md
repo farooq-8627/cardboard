@@ -2574,6 +2574,227 @@ i'm getting white screen
 
 _**Assistant**_
 
+Let me help you fix the white screen issue. This often happens due to build configuration or routing issues. Let's check and fix a few things:
+
+1. First, let's check your Vite configuration for the client:
+
+---
+
+Read file: vite.config.ts
+
+---
+
+2. Let's check your client entry point:
+
+---
+
+Read file: client/index.html
+
+---
+
+3. Let's check your main client entry point:
+
+---
+
+Read file: client/src/main.tsx
+
+---
+
+Let's make a few fixes:
+
+1. First, let's update the Vercel configuration to properly handle the client-side routing:
+
+---
+
+```diff
+  			"dest": "server/index.ts"
+  		},
++ 		{
++ 			"src": "/assets/(.*)",
++ 			"dest": "/assets/$1"
++ 		},
++ 		{
++ 			"src": "/(.*\\.[a-z]+)$",
++ 			"dest": "/$1"
++ 		},
+  		{
+  			"src": "/(.*)",
+- 			"dest": "/"
++ 			"dest": "/index.html"
+  		}
+  	]
+```
+
+---
+
+2. Let's update the client's index.html to include proper meta tags and title:
+
+---
+
+```diff
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
++     <title>WorkflowWizard</title>
++     <meta name="description" content="WorkflowWizard - Workflow Management System" />
++     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    </head>
+    <body>
+```
+
+---
+
+3. Let's update the build script to ensure proper production builds:
+
+---
+
+```diff
+  		"dev": "NODE_ENV=development VITE_HOST=true tsx server/index.ts",
+  		"build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+- 		"vercel-build": "npm run build",
++ 		"vercel-build": "NODE_ENV=production npm run build",
+  		"start": "NODE_ENV=production node dist/index.js",
+  		"check": "tsc",
+```
+
+---
+
+4. Let's update the Vite config to handle base URL and assets properly:
+
+---
+
+```diff
+  			clientPort: 3000,
+  		},
++ 		proxy: {
++ 			'/api': {
++ 				target: 'http://localhost:3000',
++ 				changeOrigin: true,
++ 			}
++ 		}
+  	},
+  	resolve: {
+  		outDir: path.resolve(import.meta.dirname, "dist/public"),
+  		emptyOutDir: true,
++ 		sourcemap: true,
++ 		rollupOptions: {
++ 			output: {
++ 				manualChunks: {
++ 					vendor: ['react', 'react-dom'],
++ 				},
++ 			},
++ 		},
+  	},
+  });
+```
+
+---
+
+Now, let's redeploy to Vercel. First, commit the changes:
+
+---
+
+```bash
+git add . && git commit -m "Fix white screen issues and update build configuration"
+```
+
+```
+shaikumarfarooq@SHAIKs-MacBook-Air-3 WorkflowWizard % git add . && git commit -m "Fix white screen issues a
+nd update build configuratigit add . && git commit -m "Fix white screen issues and update build configurati
+on"
+[main d522830] Fix white screen issues and update build configuration
+ 5 files changed, 195 insertions(+), 13 deletions(-)
+shaikumarfarooq@SHAIKs-MacBook-Air-3 WorkflowWizard %
+```
+
+---
+
+Now, redeploy to Vercel:
+
+---
+
+```bash
+vercel --prod
+```
+
+```
+shaikumarfarooq@SHAIKs-MacBook-Air-3 WorkflowWizard % vercel --prod
+Vercel CLI 41.6.0
+🔍  Inspect: https://vercel.com/farooq-8627s-projects/workflow-wizard/8sBr5fgQ8s13fzZHTWhkL3XMdB7P [3s]
+✅  Production: https://workflow-wizard-e4txnl535-farooq-8627s-projects.vercel.app [3s]
+❗️  Due to `builds` existing in your configuration file, the Build and Development Settings defined in your
+ Project Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+shaikumarfarooq@SHAIKs-MacBook-Air-3 WorkflowWizard %
+```
+
+---
+
+Great! Your application has been redeployed with the fixes. The new production URL is:
+```
+https://workflow-wizard-e4txnl535-farooq-8627s-projects.vercel.app
+```
+
+The changes we made should fix the white screen issue by:
+1. Properly handling client-side routing
+2. Configuring static asset serving
+3. Setting up proper build optimization
+4. Adding proper meta tags and title
+5. Configuring API proxying
+6. Adding source maps for better debugging
+
+Try accessing the new URL on your phone. If you still see a white screen, please check your browser's developer console (if on desktop) or let me know and we can investigate further by:
+1. Checking the network requests
+2. Looking at the console logs
+3. Verifying the build output
+4. Checking the server-side logs
+
+Would you like me to help you check any of these areas?
+
+---
+
+_**User**_
+
+getting error failed to connect to signelling server
+
+---
+
+_**Assistant**_
+
+Ah, I see the issue. The error "failed to connect to signalling server" is related to WebRTC connection, which is being managed by your `WebRTCProvider` in `main.tsx`. Let's check and fix the WebRTC configuration:
+
+1. First, let's look at your WebRTC context:
+
+---
+
+Read file: client/src/context/webrtc-context.tsx
+
+---
+
+I see the issue. The WebSocket connection is trying to use the same host and port as the web application, but in production (on Vercel), we need to specify a separate WebSocket server. Let's fix this:
+
+1. First, let's update the WebRTC context to use environment variables for the WebSocket URL:
+
+---
+
+```diff
+    // Connect to WebSocket server
+    const connectWebSocket = useCallback(() => {
+-     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+-     const wsUrl = `${protocol}//${window.location.host}/ws`;
++     const wsUrl = import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
+      
+      console.log('Connecting to WebSocket server at:', wsUrl);
+```
+
+---
+
+2. Let's create a `.env` file for development:
+
+---
+
+Cancelled
+
+---
+
 
 
 ---
