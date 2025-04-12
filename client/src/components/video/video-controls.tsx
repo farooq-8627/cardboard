@@ -2,22 +2,27 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { MdPlayArrow, MdPause, MdRadioButtonChecked, MdSettings } from 'react-icons/md';
+import { MdPlayArrow, MdPause, MdRadioButtonChecked, MdSettings, MdWaves } from 'react-icons/md';
+import { RiEmotionHappyLine } from 'react-icons/ri';
 
 interface VideoControlsProps {
   isRecording: boolean;
   recordingTime: string;
   isPrivacyMode: boolean;
+  showHeatmap: boolean;
   onToggleRecording: () => void;
   onTogglePrivacyMode: () => void;
+  onToggleHeatmap: () => void;
 }
 
 const VideoControls: React.FC<VideoControlsProps> = ({
   isRecording,
   recordingTime,
   isPrivacyMode,
+  showHeatmap,
   onToggleRecording,
-  onTogglePrivacyMode
+  onTogglePrivacyMode,
+  onToggleHeatmap
 }) => {
   return (
     <motion.div
@@ -54,6 +59,15 @@ const VideoControls: React.FC<VideoControlsProps> = ({
             checked={isPrivacyMode}
             onCheckedChange={onTogglePrivacyMode}
             className="bg-white/20 data-[state=checked]:bg-primary"
+          />
+        </div>
+        
+        <div className="flex items-center">
+          <span className="text-xs mr-2">Emotion Heatmap</span>
+          <Switch
+            checked={showHeatmap}
+            onCheckedChange={onToggleHeatmap}
+            className="bg-white/20 data-[state=checked]:bg-amber-500"
           />
         </div>
         

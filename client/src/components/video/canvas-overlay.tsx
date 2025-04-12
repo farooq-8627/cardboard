@@ -2,10 +2,12 @@ import React, { useRef, useEffect, useState } from 'react';
 import faceAnalyzer, { EmotionResult, FaceAnalysisResult } from '@/lib/face-analyzer';
 import heartRateEstimator, { HeartRateResult } from '@/lib/heart-rate-estimator';
 import eyeTracker, { EyeTrackingResult } from '@/lib/eye-tracking';
+import EmotionHeatmap from './emotion-heatmap';
 
 interface CanvasOverlayProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   isPrivacyMode: boolean;
+  showHeatmap?: boolean;
 }
 
 const CanvasOverlay: React.FC<CanvasOverlayProps> = ({ 
