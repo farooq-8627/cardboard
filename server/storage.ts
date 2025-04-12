@@ -12,6 +12,7 @@ export interface IStorage {
   getSession(sessionId: string): Promise<Session | undefined>;
   createSession(session: InsertSession): Promise<Session>;
   updateSession(sessionId: string, data: Partial<InsertSession>): Promise<Session | undefined>;
+  getActiveSessions(): Promise<Session[]>;
   
   // Biometric data methods
   storeBiometricData(data: InsertBiometricData): Promise<BiometricData>;
@@ -59,6 +60,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(sessions.sessionId, sessionId))
       .returning();
     return updatedSession || undefined;
+  }
+  
+  async getActiveSessions(): Promise<Session[]> {
+    return await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.isActive, true));
   }
   
   // Biometric data methods

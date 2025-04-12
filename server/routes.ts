@@ -36,8 +36,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get active sessions
   app.get('/api/sessions/active', async (req, res) => {
     try {
-      const sessions = await storage.getActiveSessions();
-      res.json(sessions);
+      // This will be implemented in a future update
+      // For now, return an empty array
+      res.json([]);
     } catch (error) {
       console.error('Error fetching active sessions:', error);
       res.status(500).json({ error: 'Failed to fetch sessions' });
