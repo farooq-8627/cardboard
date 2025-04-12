@@ -89,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 			// Allow connections from our known origins
 			const allowedOrigins = [
 				"http://localhost:3000",
-				"https://workflow-wizard-e4txnl535-farooq-8627s-projects.vercel.app",
+				"https://workflow-wizard-nine.vercel.app",
 			];
 
 			if (!origin || allowedOrigins.includes(origin)) {

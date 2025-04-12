@@ -2791,9 +2791,130 @@ I see the issue. The WebSocket connection is trying to use the same host and por
 
 ---
 
-Cancelled
+```diff
+- 
++ VITE_WS_URL=ws://localhost:3000/ws 
+```
 
 ---
+
+3. Let's create a production environment file:
+
+---
+
+```diff
+- 
++ VITE_WS_URL=wss://workflow-wizard-e4txnl535-farooq-8627s-projects.vercel.app/ws 
+```
+
+---
+
+4. Let's update the server's WebSocket setup to handle CORS properly:
+
+---
+
+Read file: server/index.ts
+
+---
+
+Let's check the routes setup:
+
+---
+
+Read file: server/routes.ts
+
+---
+
+Let's update the server's WebSocket configuration to handle CORS and secure connections:
+
+---
+
+```diff
+    const wss = new WebSocketServer({ 
+      server: httpServer, 
+-     path: '/ws'
+-   });
++     path: '/ws',
++     verifyClient: (info, cb) => {
++       const origin = info.origin || info.req.headers.origin;
++       // Allow connections from our known origins
++       const allowedOrigins = [
++         'http://localhost:3000',
++         'https://workflow-wizard-e4txnl535-farooq-8627s-projects.vercel.app'
++       ];
++       
++       if (!origin || allowedOrigins.includes(origin)) {
++         cb(true);
++       } else {
++         cb(false, 403, 'Forbidden');
++       }
++     }
++   });
+    
+-   wss.on('connection', (ws: WebSocket) => {
+-     console.log('New WebSocket connection established');
++   wss.on('connection', (ws: WebSocket, req) => {
++     console.log('New WebSocket connection established from:', req.headers.origin);
+      
+      ws.on('message', (message: string) => {
+```
+
+---
+
+Now let's commit these changes and redeploy:
+
+---
+
+```bash
+git add . && git commit -m "Fix WebSocket connection issues and add proper CORS" && vercel --prod
+```
+
+```
+shaikumarfarooq@SHAIKs-MacBook-Air-3 WorkflowWizard % git add . && git commit -m "Fix WebSocket connection 
+issues and add proper CORS" && vercel --prod          git add . && git commit -m "Fix WebSocket connection 
+issues and add proper CORS" && vercel --prod
+[main b0ae7bd] Fix WebSocket connection issues and add proper CORS
+ 5 files changed, 888 insertions(+), 590 deletions(-)
+ create mode 100644 .env.development
+ create mode 100644 .env.production
+Vercel CLI 41.6.0
+🔍  Inspect: https://vercel.com/farooq-8627s-projects/workflow-wizard/3Z7CUNSHwnp6sV133BiFqEBgiX42 [3s]
+✅  Production: https://workflow-wizard-nja50qioe-farooq-8627s-projects.vercel.app [3s]
+❗️  Due to `builds` existing in your configuration file, the Build and Development Settings defined in your
+ Project Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+shaikumarfarooq@SHAIKs-MacBook-Air-3 WorkflowWizard %
+```
+
+---
+
+The changes have been deployed. Here's what we've fixed:
+
+1. Updated the WebSocket connection logic to use environment-specific URLs
+2. Added proper CORS handling for WebSocket connections
+3. Added better error logging and connection status reporting
+4. Fixed the WebSocket server configuration to handle secure connections
+
+Your application should now be accessible at:
+```
+https://workflow-wizard-nja50qioe-farooq-8627s-projects.vercel.app
+```
+
+The WebSocket connection should now work properly. When you open the application:
+1. Check the browser console for any connection logs
+2. You should see "WebSocket connection established" in the logs
+3. The connection status should show as "connected"
+
+If you still see any issues, please let me know what specific error messages you're seeing in the browser console, and I can help you troubleshoot further.
+
+---
+
+_**User**_
+
+still getting same error i think you have given access to other orign since after deployment it changes. now i have given to the direct link instead of github link re-deploy to make websocket connection easier
+
+---
+
+_**Assistant**_
 
 
 
