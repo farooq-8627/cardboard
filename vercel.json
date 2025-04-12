@@ -19,8 +19,16 @@
 			"dest": "server/index.ts"
 		},
 		{
+			"src": "/assets/(.*)",
+			"dest": "/assets/$1"
+		},
+		{
+			"src": "/(.*\\.[a-z]+)$",
+			"dest": "/$1"
+		},
+		{
 			"src": "/(.*)",
-			"dest": "/"
+			"dest": "/index.html"
 		}
 	]
 }

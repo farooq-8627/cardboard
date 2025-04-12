@@ -23,6 +23,12 @@ export default defineConfig({
 		hmr: {
 			clientPort: 3000,
 		},
+		proxy: {
+			"/api": {
+				target: "http://localhost:3000",
+				changeOrigin: true,
+			},
+		},
 	},
 	resolve: {
 		alias: {
@@ -35,5 +41,13 @@ export default defineConfig({
 	build: {
 		outDir: path.resolve(import.meta.dirname, "dist/public"),
 		emptyOutDir: true,
+		sourcemap: true,
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					vendor: ["react", "react-dom"],
+				},
+			},
+		},
 	},
 });
