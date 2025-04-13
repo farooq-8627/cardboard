@@ -381,9 +381,24 @@ export const WebRTCProvider: React.FC<WebRTCProviderProps> = ({ children }) => {
 			try {
 				setDeviceType(type);
 
+				// First check if we have permissions
+				const permissions = await navigator.permissions.query({
+					name: "camera" as PermissionName,
+				});
+
+				if (permissions.state === "denied") {
+					throw new Error(
+						"Camera permission has been denied. Please enable it in your browser settings."
+					);
+				}
+
 				const constraints: MediaStreamConstraints = {
-					video: true,
-					audio: false, // Disable audio for this app since we're focusing on video processing
+					video: {
+						width: { ideal: 1280 },
+						height: { ideal: 720 },
+						facingMode: type === "mobile" ? "user" : "environment",
+					},
+					audio: false,
 				};
 
 				console.log("Requesting media stream with constraints:", constraints);
@@ -392,6 +407,13 @@ export const WebRTCProvider: React.FC<WebRTCProviderProps> = ({ children }) => {
 
 				if (localVideoRef.current) {
 					localVideoRef.current.srcObject = stream;
+					// Ensure video plays
+					try {
+						await localVideoRef.current.play();
+					} catch (playError) {
+						console.warn("Auto-play failed:", playError);
+						// Handle auto-play failure if needed
+					}
 				}
 
 				// Connect to signaling server after getting stream
@@ -402,9 +424,37 @@ export const WebRTCProvider: React.FC<WebRTCProviderProps> = ({ children }) => {
 				return stream;
 			} catch (error) {
 				console.error("Error getting user media:", error);
+				let errorMessage = "Unable to access camera. ";
+
+				if (error instanceof Error) {
+					if (
+						error.name === "NotAllowedError" ||
+						error.name === "PermissionDeniedError"
+					) {
+						errorMessage +=
+							"Camera permission was denied. Please allow camera access in your browser settings.";
+					} else if (
+						error.name === "NotFoundError" ||
+						error.name === "DevicesNotFoundError"
+					) {
+						errorMessage +=
+							"No camera found. Please ensure your device has a camera.";
+					} else if (
+						error.name === "NotReadableError" ||
+						error.name === "TrackStartError"
+					) {
+						errorMessage += "Camera is in use by another application.";
+					} else if (error.name === "OverconstrainedError") {
+						errorMessage +=
+							"Could not find a camera matching the requirements.";
+					} else {
+						errorMessage += error.message;
+					}
+				}
+
 				toast({
 					title: "Camera Error",
-					description: "Unable to access camera. Please check permissions.",
+					description: errorMessage,
 					variant: "destructive",
 				});
 				return null;

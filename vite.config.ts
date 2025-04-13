@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import fs from "fs";
 
 export default defineConfig({
 	plugins: [
@@ -19,14 +20,21 @@ export default defineConfig({
 			: []),
 	],
 	server: {
-		host: process.env.VITE_HOST === "true" ? true : false,
-		hmr: {
-			clientPort: 3000,
+		host: "0.0.0.0",
+		port: 3000,
+		https: {
+			key: fs.readFileSync("./certs/localhost+3-key.pem"),
+			cert: fs.readFileSync("./certs/localhost+3.pem"),
 		},
 		proxy: {
 			"/api": {
-				target: "http://localhost:3000",
-				changeOrigin: true,
+				target: "https://localhost:3000",
+				secure: false,
+			},
+			"/ws": {
+				target: "wss://localhost:3000",
+				secure: false,
+				ws: true,
 			},
 		},
 	},
