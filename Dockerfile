@@ -2,11 +2,16 @@ FROM node:20-slim
 
 WORKDIR /app
 
-# Install curl for healthcheck
+# Install curl for healthcheck and other build dependencies
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Install ALL dependencies including devDependencies for building
+# Install Vite globally
+RUN npm install -g vite
+
+# Copy package files
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install --legacy-peer-deps
 
 # Copy source code
@@ -14,7 +19,8 @@ COPY . .
 
 # Build the application
 ENV NODE_ENV=production
-RUN npm run build
+ENV PATH /app/node_modules/.bin:$PATH
+RUN npm run build:client && npm run build:server
 
 # Clean up dev dependencies
 RUN npm prune --production --legacy-peer-deps

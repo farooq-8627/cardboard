@@ -7781,6 +7781,122 @@ Would you like me to help you test the new Dockerfile configuration?
 
 ---
 
+_**User**_
+
+#13 [7/8] RUN npm run build
+#13 0.159 
+#13 0.159 > rest-express@1.0.0 build
+#13 0.159 > npm install --legacy-peer-deps && npm run build:client && npm run build:server
+#13 0.159 
+#13 2.189 
+#13 2.189 up to date, audited 320 packages in 2s
+#13 2.189 
+#13 2.189 26 packages are looking for funding
+#13 2.189   run `npm fund` for details
+#13 2.195 
+#13 2.195 4 vulnerabilities (2 low, 1 moderate, 1 high)
+#13 2.195 
+#13 2.195 To address issues that do not require attention, run:
+#13 2.195   npm audit fix
+#13 2.195 
+#13 2.195 To address all issues (including breaking changes), run:
+#13 2.195   npm audit fix --force
+#13 2.195 
+#13 2.195 Run `npm audit` for details.
+#13 2.318 
+#13 2.318 > rest-express@1.0.0 build:client
+#13 2.318 > vite build
+#13 2.318 
+#13 2.322 sh: 1: vite: not found
+#13 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 127
+------
+ > [7/8] RUN npm run build:
+2.195 
+2.195 To address all issues (including breaking changes), run:
+2.195   npm audit fix --force
+2.195 
+2.195 Run `npm audit` for details.
+2.318 
+2.318 > rest-express@1.0.0 build:client
+2.318 > vite build
+2.318 
+2.322 sh: 1: vite: not found
+------
+Dockerfile:17
+--------------------
+  15 |     # Build the application
+  16 |     ENV NODE_ENV=production
+  17 | >>> RUN npm run build
+  18 |     
+  19 |     # Clean up dev dependencies
+--------------------
+error: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 127
+
+---
+
+_**Assistant**_
+
+I see the issue is still persisting. Let's try a different approach by installing Vite globally in the Docker image and making sure the build scripts are properly configured.
+
+First, let me check your package.json to verify the build scripts:
+
+---
+
+Read file: package.json
+
+---
+
+Now I'll update the Dockerfile to install Vite globally and ensure the build process works correctly:
+
+---
+
+```diff
+  WORKDIR /app
+  
+- # Install curl for healthcheck
++ # Install curl for healthcheck and other build dependencies
+  RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+  
+- # Install ALL dependencies including devDependencies for building
++ # Install Vite globally
++ RUN npm install -g vite
++ 
++ # Copy package files
+  COPY package*.json ./
++ 
++ # Install dependencies
+  RUN npm install --legacy-peer-deps
+  
+  # Build the application
+  ENV NODE_ENV=production
+- RUN npm run build
++ ENV PATH /app/node_modules/.bin:$PATH
++ RUN npm run build:client && npm run build:server
+  
+  # Clean up dev dependencies
+```
+
+---
+
+Key changes I made to fix the build issue:
+
+1. Added global installation of Vite: `RUN npm install -g vite`
+2. Added the node_modules/.bin to PATH: `ENV PATH /app/node_modules/.bin:$PATH`
+3. Split the build command to run client and server builds separately instead of using the combined build script
+4. Kept the dev dependencies installation and cleanup steps
+5. Improved the organization of the Dockerfile with better comments and logical grouping
+
+These changes should resolve the "vite: not found" error because:
+1. Vite is now installed globally
+2. The local node_modules/.bin is added to PATH
+3. We're running the build commands directly rather than through the combined script
+
+Try rebuilding the Docker image with these changes. The build should now complete successfully since Vite will be available both globally and in the local node_modules.
+
+Would you like me to help you test the new Dockerfile configuration?
+
+---
+
 
 
 ---
