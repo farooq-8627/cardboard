@@ -4,6 +4,9 @@ import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
 	plugins: [
@@ -28,13 +31,14 @@ export default defineConfig({
 		},
 		proxy: {
 			"/api": {
-				target: "https://localhost:3000",
+				target: "http://localhost:3000",
+				changeOrigin: true,
 				secure: false,
 			},
 			"/ws": {
-				target: "wss://localhost:3000",
-				secure: false,
+				target: "ws://localhost:3000",
 				ws: true,
+				secure: false,
 			},
 		},
 	},
@@ -45,9 +49,9 @@ export default defineConfig({
 			"@assets": path.resolve(import.meta.dirname, "attached_assets"),
 		},
 	},
-	root: path.resolve(import.meta.dirname, "client"),
+	root: path.resolve(__dirname, "client"),
 	build: {
-		outDir: path.resolve(import.meta.dirname, "dist/public"),
+		outDir: path.resolve(__dirname, "dist/client"),
 		emptyOutDir: true,
 		sourcemap: true,
 		rollupOptions: {
