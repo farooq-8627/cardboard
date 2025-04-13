@@ -23,10 +23,14 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Build client
-        run: npm run build:client
+        run: |
+          mkdir -p dist/client
+          npm run build:client
 
       - name: Build server
-        run: npm run build:server
+        run: |
+          mkdir -p dist/server
+          npm run build:server
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
