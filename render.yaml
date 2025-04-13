@@ -1,11 +1,10 @@
 services:
   - type: web
     name: workflow-wizard
-    env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    env: docker
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: NODE_ENV
         value: production
-    healthCheckPath: /api/test
+    healthCheckPath: /health
     autoDeploy: true

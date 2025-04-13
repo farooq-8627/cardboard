@@ -4,26 +4,20 @@ WORKDIR /app
 
 # Install dependencies first (better caching)
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy source code
-COPY tsconfig.json ./
-COPY server ./server
-COPY shared ./shared
+COPY . .
 
-# Build TypeScript files
-RUN npm install -g tsx
-
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=10000
+# Build the application
+RUN npm run build
 
 # Expose the port
-EXPOSE 10000
+EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:10000/ || exit 1
+  CMD curl -f http://localhost:3000/ || exit 1
 
-# Start the server
-CMD ["tsx", "server/websocket-server.ts"] 
+# Start the application
+CMD ["npm", "start"] 

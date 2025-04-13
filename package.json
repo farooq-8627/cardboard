@@ -5,7 +5,7 @@
 	"license": "MIT",
 	"scripts": {
 		"dev": "NODE_ENV=development VITE_HOST=true tsx server/index.ts",
-		"build": "vite build && tsc -p tsconfig.server.json",
+		"build": "npm install --legacy-peer-deps && vite build && tsc -p tsconfig.server.json",
 		"vercel-build": "NODE_ENV=production npm run build",
 		"start": "NODE_ENV=production tsx server/index.ts",
 		"check": "tsc",
