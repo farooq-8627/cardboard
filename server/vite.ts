@@ -24,11 +24,11 @@ export async function setupVite(app: Express, server: Server) {
 		middlewareMode: true,
 		hmr: {
 			server,
-			host: true,
+			host: "localhost",
 			port: 3000,
 			clientPort: 3000,
 		},
-		allowedHosts: true,
+		allowedHosts: ["localhost"],
 		host: true,
 	};
 
